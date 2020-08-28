@@ -1,4 +1,13 @@
-export const createTripInfoTemplate = () => {
+import {events} from "../main.js";
+import {createElement} from "../utils.js";
+
+const createTripInfoTemplate = () => {
+  const pricesPoints = events.map(({price, offers}) => price + offers.reduce((a, b) => {
+    return (a.price || 0) + (b.price || 0);
+  }, 0)).reduce((a, b) => {
+    return a + b;
+  });
+
   return (
     `<section class="trip-main__trip-info  trip-info">
       <div class="trip-info__main">
@@ -8,8 +17,28 @@ export const createTripInfoTemplate = () => {
       </div>
 
       <p class="trip-info__cost">
-        Total: &euro;&nbsp;<span class="trip-info__cost-value">1230</span>
+        Total: &euro;&nbsp;<span class="trip-info__cost-value">${pricesPoints}</span>
       </p>
     </section>`
   );
 };
+
+export default class TripInfo {
+  constructor() {
+    this._element = null;
+  }
+  getTemplate() {
+    return createTripInfoTemplate();
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
