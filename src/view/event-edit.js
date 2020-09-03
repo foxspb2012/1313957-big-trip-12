@@ -1,37 +1,8 @@
-import {MIN_COUNT_FOR_DATES} from "../const.js";
-import {createElement} from "../utils.js";
-
-const typesTransfer = [
-  `Taxi`,
-  `Bus`,
-  `Train`,
-  `Ship`,
-  `Transport`,
-  `Drive`,
-  `Flight`,
-];
-
-const typesActivity = [
-  `Check-in`,
-  `Sightseeing`,
-  `Restaurant`,
-];
-
-const createEventEditOfferTemplate = (offers) => {
-  return offers.map(({name, price, className}) =>
-    `<div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${className}-1" type="checkbox" name="event-offer-${className}" checked>
-      <label class="event__offer-label" for="event-offer-${className}-1">
-        <span class="event__offer-title">${name}</span>
-        &plus;
-        &euro;&nbsp;<span class="event__offer-price">${price}</span>
-    </label>
-    </div>`)
-    .join(``);
-};
+import {getFormatEditTime, getFormatText} from '../utils.js';
+import {typesTransfer, typesActivity} from '../const.js';
 
 const createEventEditTypeTransferTemplate = (currentType) => {
-  return typesTransfer.map((type) =>
+  return Object.keys(typesTransfer).map((type) =>
     `<div class="event__type-item">
       <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${currentType === type ? `checked` : ``}>
       <label class="event__type-label  event__type-label--${type.toLowerCase()}" for="event-type-${type.toLowerCase()}-1">${type}</label>
@@ -40,7 +11,7 @@ const createEventEditTypeTransferTemplate = (currentType) => {
 };
 
 const createEventEditTypeActivityTemplate = (currentType) => {
-  return typesActivity.map((type) =>
+  return Object.keys(typesActivity).map((type) =>
     `<div class="event__type-item">
       <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${currentType === type ? `checked` : ``}>
       <label class="event__type-label  event__type-label--${type.toLowerCase()}" for="event-type-${type.toLowerCase()}-1">${type}</label>
@@ -48,63 +19,36 @@ const createEventEditTypeActivityTemplate = (currentType) => {
     .join(``);
 };
 
-const generateStartDate = (date) => {
-  const startYear = date.getFullYear();
-  const startMonth = date.getMonth();
-  const startDay = date.getDate();
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  if (startMonth <= MIN_COUNT_FOR_DATES) {
-    return startDay + `/` + `0` + (startMonth + 1) + `/` + startYear + ` ` + hours + `:` + minutes + ` `;
-  } else {
-    return startDay + `/` + (startMonth + 1) + `/` + startYear + ` ` + hours + `:` + minutes;
-  }
-};
-const generateEndDate = (date) => {
-  const endYear = date.getFullYear();
-  const endMonth = date.getMonth();
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const endDay = date.getDate() < 21 ? date.getDate() + Math.floor(Math.random() * 10) : date.getDate() + Math.floor(Math.random() * 3);
-  if (endMonth <= MIN_COUNT_FOR_DATES) {
-    return endDay + `/` + `0` + (endMonth + 1) + `/` + endYear + ` ` + hours + `:` + minutes;
-  } else {
-    return endDay + `/` + (endMonth + 1) + `/` + endYear + ` ` + hours + `:` + minutes;
-  }
-};
-
-const createEventEditTemplate = (event) => {
-  const {type, city, destination, offers, isFavorite, price, startDate, endDate} = event;
-  let eventTypeArticle = ``;
-  switch (type) {
-    case `Taxi`:
-    case `Bus`:
-    case `Train`:
-    case `Ship`:
-    case `Transport`:
-    case `Drive`:
-    case `Flight`:
-      eventTypeArticle = `to`;
-      break;
-    case `Check-in`:
-    case `Sightseeing`:
-    case `Restaurant`:
-      eventTypeArticle = `in`;
-      break;
-  }
-  const createPhotosTape = (photos) => {
-    return photos.map((photo) => `<img class="event__photo" src=${photo}>`).join(``);
-  };
-
-  const offerTemplate = createEventEditOfferTemplate(offers);
-  const typeTransferTemplate = createEventEditTypeTransferTemplate(type);
-  const typeActivityTemplate = createEventEditTypeActivityTemplate(type);
-  const randomStartDate = generateStartDate(startDate);
-  const randomEndDate = generateEndDate(endDate);
-  const photoTemplate = createPhotosTape(destination.image);
+const createOffer = (offer) => {
+  const {title, price, isChecked} = offer;
 
   return (
-    `<li class="trip-events__item opened">
+    `<div class="event__offer-selector">
+      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${getFormatText(title)}" type="checkbox" name="event-offer-luggage" ${isChecked ? `checked` : ``}>
+      <label class="event__offer-label" for="event-offer-${getFormatText(title)}">
+        <span class="event__offer-title">${title}</span>
+        &plus;
+        &euro;&nbsp;<span class="event__offer-price">${price}</span>
+      </label>
+    </div>`
+  );
+};
+
+const createPhoto = (photo) => `<img class="event__photo" src="${photo}" alt="Event photo"></img>`;
+const preposition = Object.assign(typesTransfer, typesActivity);
+
+export const createEventEditTemplate = (trip) => {
+  const {type, destination, description, startTime, endTime, price, isFavorite, offers, photos} = trip;
+  const prep = preposition[type];
+  const typeTransferTemplate = createEventEditTypeTransferTemplate(type);
+  const typeActivityTemplate = createEventEditTypeActivityTemplate(type);
+  const formattedStartTime = getFormatEditTime(startTime);
+  const formattedEndTime = getFormatEditTime(endTime);
+  const offersElement = offers.map((it) => createOffer(it)).join(``);
+  const photosElement = photos.map((it) => createPhoto(it)).join(``);
+
+  return (
+    `<li class="trip-events__item">
       <form class="event  event--edit" action="#" method="post">
         <header class="event__header">
           <div class="event__type-wrapper">
@@ -129,9 +73,9 @@ const createEventEditTemplate = (event) => {
 
           <div class="event__field-group  event__field-group--destination">
             <label class="event__label  event__type-output" for="event-destination-1">
-                ${type} ${eventTypeArticle}
+                ${type} ${prep}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${city}" list="destination-list-1">
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination}" list="destination-list-1">
             <datalist id="destination-list-1">
               <option value="Amsterdam"></option>
               <option value="Geneva"></option>
@@ -143,12 +87,12 @@ const createEventEditTemplate = (event) => {
             <label class="visually-hidden" for="event-start-time-1">
               From
             </label>
-            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${randomStartDate}">
+            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${formattedStartTime}">
             &mdash;
             <label class="visually-hidden" for="event-end-time-1">
               To
             </label>
-            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${randomEndDate}">
+            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${formattedEndTime}">
           </div>
 
           <div class="event__field-group  event__field-group--price">
@@ -180,16 +124,16 @@ const createEventEditTemplate = (event) => {
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
             <div class="event__available-offers">
-              ${offerTemplate}
+              ${offersElement}
             </div>
           </section>
           <section class="event__section  event__section--destination">
-            <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-            <p class="event__destination-description">${destination.description}</p>
+            <h3 class="event__section-title  event__section-title--destination">${destination}</h3>
+            <p class="event__destination-description">${description}</p>
 
             <div class="event__photos-container">
               <div class="event__photos-tape">
-                ${photoTemplate}
+                ${photosElement}
               </div>
             </div>
           </section>
@@ -198,24 +142,3 @@ const createEventEditTemplate = (event) => {
     </li>`
   );
 };
-
-export default class EventEdit {
-  constructor(event) {
-    this._event = event;
-    this._element = null;
-  }
-  getTemplate() {
-    return createEventEditTemplate(this._event);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
-  }
-}

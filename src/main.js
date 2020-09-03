@@ -1,22 +1,68 @@
-import TripInfoView from "./view/trip-info.js";
-import MenuView from "./view/site-menu.js";
+import {createSiteMenuTemplate} from "./view/site-menu.js";
+import {createTripInfoTemplate} from './view/trip-info.js';
+import {createTripCostTemplate} from './view/trip-cost.js';
+import {createFilterTemplate} from './view/filter.js';
+import {createTripSortTemplate} from './view/trip-sort.js';
+import {createEventEditTemplate} from './view/event-edit.js';
+import {createTripDaysContainer} from './view/trip-days-container.js';
+import {createTripDaysItemTemplate} from './view/trip-days.js';
+import {createTripEventsItemTemplate} from './view/trip-events-item.js';
+import {createTrip} from './mock/trip.js';
+import {render} from "./utils.js";
+
+const EVENTS_COUNT = 20;
+const trips = new Array(EVENTS_COUNT).fill().map(createTrip).sort((a, b) => a.startTime - b.startTime);
+const tripDays = [...new Set(trips.map((trip) => new Date(trip.startTime).toDateString()))];
+
+const bodyElement = document.querySelector(`.page-body`);
+const tripMainElement = bodyElement.querySelector(`.trip-main`);
+const tripMainControlsElement = tripMainElement.querySelector(`.trip-main__trip-controls`);
+const menuHeaderElement = tripMainControlsElement.querySelector(`h2`);
+const tripEventsElement = bodyElement.querySelector(`.trip-events`);
+
+render(tripMainElement, createTripInfoTemplate(trips), `afterbegin`);
+
+const tripMainInfoElement = tripMainElement.querySelector(`.trip-main__trip-info`);
+
+render(tripMainInfoElement, createTripCostTemplate(trips), `beforeend`);
+render(menuHeaderElement, createSiteMenuTemplate(), `afterend`);
+render(tripMainControlsElement, createFilterTemplate(), `beforeend`);
+render(tripEventsElement, createTripSortTemplate(), `beforeend`);
+render(tripEventsElement, createTripDaysContainer(), `beforeend`);
+
+const tripDaysElement = tripEventsElement.querySelector(`.trip-days`);
+
+tripDays.forEach((day, index) => {
+  render(tripDaysElement, createTripDaysItemTemplate(day, index), `beforeend`);
+
+  const tripDayElement = tripDaysElement.querySelector(`.trip-days__item:last-child`);
+  const tripEventsListElement = tripDayElement.querySelector(`.trip-events__list`);
+
+  trips.filter((trip) => new Date(trip.startTime).toDateString() === day)
+    .forEach((trip) => render(tripEventsListElement, createTripEventsItemTemplate(trip), `beforeend`));
+});
+
+const tripEventsListElement = tripDaysElement.querySelector(`.trip-events__list`);
+render(tripEventsListElement, createEventEditTemplate(trips[0]), `afterbegin`);
+
+
+/* import TripInfoView from "./view/trip-info.js";
+
 import FilterView from "./view/filter.js";
 import SortView from "./view/sort.js";
 import EventListView from "./view/events-list.js";
-import TripEditView from "./view/trip-edit.js";
+import TripEditView from "./view/event-edit.js";
 import TripView from "./view/trip.js";
 import {generateEvent} from "./mock/trip.js";
 import {render} from "./utils.js";
 
 const EVENTS_COUNT = 20;
 
-export const events = new Array(EVENTS_COUNT).fill().map(generateEvent);
-
-events.sort((a, b) => {
+export const events = new Array(EVENTS_COUNT).fill().map(generateEvent).sort((a, b) => {
   return a.startDate - b.startDate;
 });
 
-const arrayFromEvents = [];
+ const arrayFromEvents = [];
 
 const counter = {
   date: ``,
@@ -101,12 +147,13 @@ const pageMainElement = document.querySelector(`.page-body__page-main`);
 const tripEventsElements = pageMainElement.querySelector(`.trip-events`);
 
 render(tripEventsElements, new SortView().getElement(), `beforeend`);
-render(tripEventsElements, new EventListView(arrayFromEvents).getElement(), `beforeend`);
+render(tripEventsElements, new EventListView(events).getElement(), `beforeend`);
 
 const eventListElements = pageMainElement.querySelectorAll(`.trip-events__list`);
 
 Array.from(eventListElements).forEach((eventListElement, index) => {
-  for (let i = 0; i < arrayFromEvents[index].points.length; i++) {
-    renderEvent(eventListElement, arrayFromEvents[index].points[i]);
+  for (let i = 0; i < events[index].points.length; i++) {
+    renderEvent(eventListElement, events[index].points[i]);
   }
 });
+*/

@@ -1,15 +1,20 @@
-export const eventsTypes = [
-  `Bus`,
-  `Check-in`,
-  `Drive`,
-  `Flight`,
-  `Restaurant`,
-  `Ship`,
-  `Sightseeing`,
-  `Taxi`,
-  `Train`,
-  `Transport`,
-];
+import {getRandomInteger} from './utils.js';
+
+export const typesTransfer = {
+  'Taxi': `to`,
+  'Bus': `to`,
+  'Train': `to`,
+  'Ship': `to`,
+  'Transport': `to`,
+  'Drive': `to`,
+  'Flight': `to`,
+};
+
+export const typesActivity = {
+  'Check-in': `in`,
+  'Sightseeing': `in`,
+  'Restaurant': `in`,
+};
 
 export const eventsDestinations = [
   `Amsterdam`,
@@ -32,12 +37,12 @@ export const eventDescriptions = [
   `In rutrum ac purus sit amet tempus.`,
 ];
 
-export const offers = [
-  {name: `Choose seats`, price: 40, className: `seats`},
-  {name: `Add meal`, price: 60, className: `meal`},
-  {name: `Travel by train`, price: 80, className: `train`},
-  {name: `Switch to comfort class`, price: 90, className: `comfort`},
-  {name: `Add luggage`, price: 50, className: `luggage`},
-];
-
 export const MIN_COUNT_FOR_DATES = 9;
+
+export const offers = [
+  {title: `Choose seats`, price: 40, isChecked: Boolean(getRandomInteger(0, 1))},
+  {title: `Add meal`, price: 60, isChecked: Boolean(getRandomInteger(0, 1))},
+  {title: `Travel by train`, price: 80, isChecked: Boolean(getRandomInteger(0, 1))},
+  {title: `Switch to comfort class`, price: 90, isChecked: Boolean(getRandomInteger(0, 1))},
+  {title: `Add luggage`, price: 50, isChecked: Boolean(getRandomInteger(0, 1))},
+];

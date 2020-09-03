@@ -1,62 +1,26 @@
-import {getRandomInteger, getRandomElementFromArray} from "../utils.js";
-import {eventsTypes, eventsDestinations, eventDescriptions, offers} from "../const.js";
+import {getRandomInteger} from '../utils.js';
+import {typesTransfer, typesActivity, eventsDestinations, eventDescriptions, offers} from '../const.js';
 
-const generateEventOffers = () => {
-  let randomOffers = [];
-  for (let i = 0; i <= getRandomInteger(0, 5); i++) {
-    const randomIndex = getRandomInteger(0, offers.length - 1);
-    randomOffers.push(offers[randomIndex]);
-  }
-  return randomOffers;
+const tripTypes = Object.keys(typesTransfer).concat(Object.keys(typesActivity));
+
+const getRandomDate = () => Date.now() + Math.floor(Math.random() * 7 * 24 * getRandomInteger(0, 60) * 60 * 1000);
+const getDescription = (arr) => {
+  return arr.slice(0, getRandomInteger(1, arr.length - 1)).join(``);
 };
+const getPhotos = () => new Array(getRandomInteger(1, 5)).fill().map(() => `http://picsum.photos/248/152?r=${Math.random()}`);
 
-const generatePrice = () => {
-  return Math.ceil(getRandomInteger(20, 180));
-};
-
-const generateDescription = () => {
-  const randomIndex = getRandomInteger(0, eventDescriptions.length - 1);
-  let randomDescriptions = [];
-  for (let i = randomIndex; i <= 5; i++) {
-    randomDescriptions.push(eventDescriptions[i]);
-  }
-  return randomDescriptions;
-};
-
-const generatePhoto = () => {
-  const randomIndex = getRandomInteger(0, eventDescriptions.length - 1);
-  let photo = [];
-  for (let i = randomIndex; i <= 5; i++) {
-    photo.push(`http://picsum.photos/248/152?r=${Math.random()}`);
-  }
-  return photo;
-};
-
-const dateNow = new Date();
-const dateNowPlusOneDay = new Date(dateNow.getFullYear(), dateNow.getMonth(), dateNow.getDate() + 1, dateNow.getHours(), dateNow.getMinutes());
-const dateNowPlusSomeDays = new Date(dateNowPlusOneDay.getFullYear(), dateNowPlusOneDay.getMonth(), dateNowPlusOneDay.getDate() + Math.floor(Math.random() * 5), dateNowPlusOneDay.getHours(), dateNowPlusOneDay.getMinutes());
-const dateNowPlusOneDayInMS = new Date(dateNowPlusOneDay).getTime();
-const dateNowPlusSomeDaysInMS = new Date(dateNowPlusSomeDays).getTime();
-
-const getRandomDate = () => {
-  const randomDateInMS = getRandomInteger(dateNowPlusOneDayInMS, dateNowPlusSomeDaysInMS);
-  const randomDate = new Date(randomDateInMS);
-  return randomDate;
-};
-
-export const generateEvent = () => {
+export const createTrip = () => {
+  const startTime = getRandomDate();
+  const endTime = getRandomDate();
   return {
-    type: getRandomElementFromArray(eventsTypes),
-    city: getRandomElementFromArray(eventsDestinations),
-    offers: generateEventOffers(),
-    isFavorite: Boolean(getRandomInteger(0, 1)),
-    price: generatePrice(),
-    startDate: getRandomDate(),
-    endDate: getRandomDate(),
-    destination: {
-      image: generatePhoto(),
-      description: generateDescription(),
-    },
+    type: tripTypes[getRandomInteger(0, tripTypes.length - 1)],
+    destination: eventsDestinations[getRandomInteger(0, eventsDestinations.length - 1)],
+    description: getDescription(eventDescriptions),
+    startTime: Math.min(startTime, endTime),
+    endTime: Math.max(startTime, endTime),
+    price: getRandomInteger(10, 180),
+    isFavorite: getRandomInteger(0, 1),
+    photos: getPhotos(),
+    offers: offers.slice(0, getRandomInteger(0, 5))
   };
 };
-
