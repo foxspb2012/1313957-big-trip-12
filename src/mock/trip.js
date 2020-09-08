@@ -1,5 +1,6 @@
 import {getRandomInteger} from '../utils.js';
 import {typesTransfer, typesActivity, eventsDestinations, eventDescriptions, offers} from '../const.js';
+const EVENTS_COUNT = 20;
 
 const tripTypes = Object.keys(typesTransfer).concat(Object.keys(typesActivity));
 
@@ -9,7 +10,7 @@ const getDescription = (arr) => {
 };
 const getPhotos = () => new Array(getRandomInteger(1, 5)).fill().map(() => `http://picsum.photos/248/152?r=${Math.random()}`);
 
-export const createTrip = () => {
+const createTrip = () => {
   const startTime = getRandomDate();
   const endTime = getRandomDate();
   return {
@@ -24,3 +25,6 @@ export const createTrip = () => {
     offers: offers.slice(0, getRandomInteger(0, 5))
   };
 };
+
+export const trips = new Array(EVENTS_COUNT).fill().map(createTrip).sort((a, b) => a.startTime - b.startTime);
+export const tripDays = [...new Set(trips.map((trip) => new Date(trip.startTime).toDateString()))];

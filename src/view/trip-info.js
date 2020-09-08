@@ -1,4 +1,4 @@
-import {getFormatDate} from '../utils.js';
+import {getFormatDate, createElement} from '../utils.js';
 
 export const createTripInfoTemplate = (trips) => {
   const firstPoint = trips[0];
@@ -17,3 +17,25 @@ export const createTripInfoTemplate = (trips) => {
     </section>`
   );
 };
+
+export default class TripInfoElement {
+  constructor(trips) {
+    this._trips = trips;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createTripInfoTemplate(this._trips);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

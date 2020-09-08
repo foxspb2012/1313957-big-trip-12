@@ -1,4 +1,4 @@
-import {getFormatEditTime, getFormatText} from '../utils.js';
+import {getFormatEditTime, getFormatText, createElement} from '../utils.js';
 import {typesTransfer, typesActivity} from '../const.js';
 
 const createEventEditTypeTransferTemplate = (currentType) => {
@@ -37,7 +37,7 @@ const createOffer = (offer) => {
 const createPhoto = (photo) => `<img class="event__photo" src="${photo}" alt="Event photo"></img>`;
 const preposition = Object.assign(typesTransfer, typesActivity);
 
-export const createEventEditTemplate = (trip) => {
+const createEventEditTemplate = (trip) => {
   const {type, destination, description, startTime, endTime, price, isFavorite, offers, photos} = trip;
   const prep = preposition[type];
   const typeTransferTemplate = createEventEditTypeTransferTemplate(type);
@@ -142,3 +142,25 @@ export const createEventEditTemplate = (trip) => {
     </li>`
   );
 };
+
+export default class EventEdit {
+  constructor(trip) {
+    this._trip = trip;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createEventEditTemplate(this._trip);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
