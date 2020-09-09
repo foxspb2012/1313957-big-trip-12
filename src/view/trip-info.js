@@ -3,7 +3,7 @@ import {getFormatDate, createElement} from '../utils.js';
 export const createTripInfoTemplate = (trips) => {
   const firstPoint = trips[0];
   const lastPoint = trips[trips.length - 1];
-  const dates = `${getFormatDate(firstPoint.startTime)}&nbsp;&mdash;&nbsp;${getFormatDate(lastPoint.startTime)}`;
+  const dates = trips.length ? `${getFormatDate(firstPoint.startTime)}&nbsp;&mdash;&nbsp;${getFormatDate(lastPoint.startTime)}` : ``;
   const uniquePoint = [...new Set(trips.map((trip) => trip.destination))];
   const title = (uniquePoint.length > 3) ? `${firstPoint.destination} &mdash;...&mdash; ${lastPoint.destination}` : uniquePoint.join(`-`);
 
