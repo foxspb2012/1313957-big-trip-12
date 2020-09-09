@@ -7,6 +7,7 @@ import EventEditView from './view/event-edit.js';
 import DaysListView from './view/trip-days-container.js';
 import DayView from './view/trip-days.js';
 import EventView from './view/trip-events-item.js';
+import WithoutEvent from './view/without-event.js';
 import {trips, tripDays} from './mock/trip.js';
 import {renderElement, RenderPosition} from './utils.js';
 
@@ -28,9 +29,20 @@ const renderEvent = (eventList, trip) => {
 
   const replaceFormToCard = () => {
     eventList.replaceChild(eventElement.getElement(), eventEditElement.getElement());
+    document.removeEventListener(`keydown`, onEscKeyDown);
   };
 
-  eventElement.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, replaceCardToForm);
+  const onEscKeyDown = (evt) => {
+    if (evt.key === `Escape` || evt.key === `Esc`) {
+      evt.preventDefault();
+      replaceFormToCard();
+    }
+  };
+
+  eventElement.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
+    replaceCardToForm();
+    document.addEventListener(`keydown`, onEscKeyDown);
+  });
 
   eventEditElement.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
     replaceFormToCard();
@@ -48,18 +60,23 @@ renderElement(tripInfoElement.getElement(), new TripCostView(trips).getElement()
 renderElement(tripMainElement, tripInfoElement.getElement(), RenderPosition.AFTERBEGIN);
 renderElement(tripMainControlsElement, new MenuView().getElement(), RenderPosition.AFTERBEGIN);
 renderElement(tripMainControlsElement, new FilterView().getElement(), RenderPosition.BEFOREEND);
-renderElement(tripEventsElement, new SortView().getElement(), RenderPosition.BEFOREEND);
 
-tripDays
-  .forEach((day, index) => {
-    const tripDayElement = new DayView(day, index);
-    const tripEventsList = tripDayElement.getElement().querySelector(`.trip-events__list`);
+if (trips.length === 0) {
+  renderElement(tripEventsElement, new WithoutEvent().getElement(), RenderPosition.BEFOREEND);
+} else {
+  renderElement(tripEventsElement, new SortView().getElement(), RenderPosition.BEFOREEND);
 
-    renderElement(tripDaysList.getElement(), tripDayElement.getElement(), RenderPosition.BEFOREEND);
+  tripDays
+    .forEach((day, index) => {
+      const tripDayElement = new DayView(day, index);
+      const tripEventsList = tripDayElement.getElement().querySelector(`.trip-events__list`);
 
-    trips
-      .filter((trip) => new Date(trip.startTime).toDateString() === day)
-      .forEach((trip) => renderEvent(tripEventsList, trip));
-  });
+      renderElement(tripDaysList.getElement(), tripDayElement.getElement(), RenderPosition.BEFOREEND);
 
-renderElement(tripEventsElement, tripDaysList.getElement(), RenderPosition.BEFOREEND);
+      trips
+        .filter((trip) => new Date(trip.startTime).toDateString() === day)
+        .forEach((trip) => renderEvent(tripEventsList, trip));
+    });
+
+  renderElement(tripEventsElement, tripDaysList.getElement(), RenderPosition.BEFOREEND);
+}
