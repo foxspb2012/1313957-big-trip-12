@@ -1,4 +1,4 @@
-import {getRandomInteger} from '../utils.js';
+import {getRandomInteger} from '../utils/common.js';
 import {typesTransfer, typesActivity, eventsDestinations, eventDescriptions, offers} from '../const.js';
 const EVENTS_COUNT = 20;
 
@@ -27,4 +27,3 @@ const createTrip = () => {
 };
 
 export const trips = new Array(EVENTS_COUNT).fill().map(createTrip).sort((a, b) => a.startTime - b.startTime);
-export const tripDays = [...new Set(trips.map((trip) => new Date(trip.startTime).toDateString()))];
