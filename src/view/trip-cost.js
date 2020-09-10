@@ -1,4 +1,4 @@
-import {createElement} from '../utils.js';
+import AbstractView from './abstract.js';
 
 const getTripCost = (trips) => trips.reduce((accumulator, currentValue) =>
   accumulator + currentValue.price + currentValue.offers.reduce((acc, curValue) => acc + curValue.price, 0), 0);
@@ -13,24 +13,13 @@ const createTripCostTemplate = (trips) => {
   );
 };
 
-export default class TripCost {
+export default class TripCost extends AbstractView {
   constructor(trips) {
+    super();
     this._trips = trips;
-    this._element = null;
   }
 
   getTemplate() {
     return createTripCostTemplate(this._trips);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

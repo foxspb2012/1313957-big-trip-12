@@ -1,4 +1,5 @@
-import {getFormatEditTime, getFormatText, createElement} from '../utils.js';
+import AbstractView from './abstract.js';
+import {getFormatEditTime, getFormatText} from '../utils/common.js';
 import {typesTransfer, typesActivity} from '../const.js';
 
 const createEventEditTypeTransferTemplate = (currentType) => {
@@ -143,24 +144,24 @@ const createEventEditTemplate = (trip) => {
   );
 };
 
-export default class EventEdit {
+export default class EventEdit extends AbstractView {
   constructor(trip) {
+    super();
     this._trip = trip;
-    this._element = null;
+    this._formSubmitHandler = this._formSubmitHandler.bind(this);
   }
 
   getTemplate() {
     return createEventEditTemplate(this._trip);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
+  _formSubmitHandler(evt) {
+    evt.preventDefault();
+    this._callback.submit();
   }
 
-  removeElement() {
-    this._element = null;
+  setFormSubmitHandler(callback) {
+    this._callback.submit = callback;
+    this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
   }
 }
