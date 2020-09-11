@@ -23,3 +23,6 @@ export const getFormatEditTime = (time) => {
 
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 };
+
+export const sortByPrice = (a, b) => b.price - a.price;
+export const sortByTime = (a, b) => (b.endTime - b.startTime - a.endTime + a.startTime);

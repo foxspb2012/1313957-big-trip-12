@@ -46,3 +46,9 @@ export const offers = [
   {title: `Switch to comfort class`, price: 90, isChecked: Boolean(getRandomInteger(0, 1))},
   {title: `Add luggage`, price: 50, isChecked: Boolean(getRandomInteger(0, 1))},
 ];
+
+export const SortType = {
+  DEFAULT: `event`,
+  PRICE: `price`,
+  TIME: `time`,
+};
