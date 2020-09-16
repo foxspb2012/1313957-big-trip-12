@@ -1,4 +1,4 @@
-import AbstractView from './abstract.js';
+import SmartView from './smart.js';
 import {getFormatEditTime, getFormatText} from '../utils/common.js';
 import {typesTransfer, typesActivity} from '../const.js';
 
@@ -144,25 +144,60 @@ const createEventEditTemplate = (trip) => {
   );
 };
 
-export default class EventEdit extends AbstractView {
+export default class EventEdit extends SmartView {
   constructor(trip) {
     super();
     this._trip = trip;
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._favoriteChangeHandler = this._favoriteChangeHandler.bind(this);
+    this._typeChangeHandler = this._typeChangeHandler.bind(this);
+    this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
+
+    this._setInnerHandlers();
   }
 
   getTemplate() {
     return createEventEditTemplate(this._trip);
   }
 
-  _formSubmitHandler(evt) {
-    evt.preventDefault();
-    this._callback.submit();
+  restoreHandlers() {
+    this._setInnerHandlers();
+    this.setFormSubmitHandler(this._callback.formSubmit);
   }
 
   setFormSubmitHandler(callback) {
-    this._callback.submit = callback;
+    this._callback.formSubmit = callback;
     this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
     this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._formSubmitHandler);
+  }
+
+  reset(event) {
+    this.updateData(event);
+  }
+
+  _setInnerHandlers() {
+    this.getElement().querySelector(`.event__type-list`).addEventListener(`change`, this._typeChangeHandler);
+    this.getElement().querySelector(`.event__favorite-checkbox`).addEventListener(`change`, this._favoriteChangeHandler);
+    this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, this._destinationChangeHandler);
+  }
+
+  _formSubmitHandler(evt) {
+    evt.preventDefault();
+    this._callback.formSubmit(this._trip);
+  }
+
+  _favoriteChangeHandler(evt) {
+    evt.preventDefault();
+    this.updateData({isFavorite: !this._trip.isFavorite});
+  }
+
+  _typeChangeHandler(evt) {
+    evt.preventDefault();
+    this.updateData({type: evt.target.value});
+  }
+
+  _destinationChangeHandler(evt) {
+    evt.preventDefault();
+    this.updateData({destination: evt.target.value});
   }
 }

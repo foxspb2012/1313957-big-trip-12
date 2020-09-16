@@ -1,48 +1,53 @@
 import SortView from '../view/trip-sort.js';
-import EventView from '../view/trip-events-item.js';
-import EventEditView from '../view/event-edit.js';
 import DayView from '../view/trip-days.js';
 import DaysListView from '../view/trip-days-container.js';
 import WithoutEvent from '../view/without-event.js';
-import {render, RenderPosition, replace} from '../utils/render';
-import {sortByPrice, sortByTime} from '../utils/common.js';
+import EventPresenter from './event.js';
+import {render, RenderPosition} from '../utils/render';
+import {sortByPrice, sortByTime, updateItem} from '../utils/common.js';
 import {SortType} from '../const.js';
 
 export default class Trip {
   constructor(tripContainer) {
     this._tripContainer = tripContainer;
     this._trips = null;
-    this._tripDays = null;
+    this._eventPresenter = {};
 
     this._sortComponent = new SortView();
     this._dayListComponent = new DaysListView();
-    this._noEventComponent = new WithoutEvent();
-    this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
+    this._withoutEventComponent = new WithoutEvent();
+    this._sortTypeChangeHandler = this._sortTypeChangeHandler.bind(this);
+    this._eventChangeHandler = this._eventChangeHandler.bind(this);
+    this._modeChangeHandler = this._modeChangeHandler.bind(this);
   }
 
   init(trips) {
     this._trips = trips.slice();
-    this._tripDays = [...new Set(this._trips.map((trip) => new Date(trip.startTime).toDateString()))];
 
     if (this._trips.length === 0) {
-      this._renderNoEvent();
+      this._renderWithoutEvent();
     } else {
       this._renderSort();
       this._renderEvents();
     }
   }
 
-  _renderEvents(trips = this._trips, isSortDefault = true) {
-    this._dayListComponent.getElement().innerHTML = ``;
+  _eventChangeHandler(updatedEvent) {
+    this._trips = updateItem(this._trips, updatedEvent);
+    this._eventPresenter[updatedEvent.id].init(updatedEvent);
+  }
 
-    const days = isSortDefault ? this._tripDays : [true];
+  _renderEvents(trips = this._trips, isSortDefault = true) {
+    const tripDays = [...new Set(trips.map((trip) => new Date(trip.startTime).toDateString()))];
+    const days = isSortDefault ? tripDays : [true];
+
     days.forEach((day, index) => {
       const tripDayComponent = isSortDefault ? new DayView(day, index) : new DayView();
       const tripEventList = tripDayComponent.getElement().querySelector(`.trip-events__list`);
 
       trips
         .filter((trip) => isSortDefault ? new Date(trip.startTime).toDateString() === day : trip)
-        .forEach((trip) => this._renderEvent(tripEventList, trip));
+        .forEach((event) => this._renderEvent(tripEventList, event));
 
       render(this._dayListComponent, tripDayComponent, RenderPosition.BEFOREEND);
     });
@@ -50,13 +55,9 @@ export default class Trip {
     render(this._tripContainer, this._dayListComponent, RenderPosition.BEFOREEND);
   }
 
-  _renderSort() {
-    this._sortComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
-    render(this._tripContainer, this._sortComponent, RenderPosition.BEFOREEND);
-  }
-
-  _handleSortTypeChange(sortType) {
+  _sortTypeChangeHandler(sortType) {
     const trips = this._trips.slice();
+    this._clearEvents();
     switch (sortType) {
       case SortType.TIME:
         this._renderEvents(trips.sort(sortByTime), false);
@@ -71,40 +72,25 @@ export default class Trip {
     }
   }
 
-  _renderEvent(eventList, trip) {
-    const eventComponent = new EventView(trip);
-    const eventEditComponent = new EventEditView(trip);
-
-    const replaceCardToForm = () => {
-      replace(eventEditComponent, eventComponent);
-    };
-
-    const replaceFormToCard = () => {
-      replace(eventComponent, eventEditComponent);
-      document.removeEventListener(`keydown`, onEscKeyDown);
-    };
-
-    const onEscKeyDown = (evt) => {
-      if (evt.key === `Escape` || evt.key === `Esc`) {
-        evt.preventDefault();
-        replaceFormToCard();
-      }
-    };
-
-    eventComponent.setClickHandler(() => {
-      replaceCardToForm();
-      document.addEventListener(`keydown`, onEscKeyDown);
-    });
-
-    eventEditComponent.setFormSubmitHandler(() => {
-      replaceFormToCard();
-    });
-
-    render(eventList, eventComponent, RenderPosition.BEFOREEND);
+  _renderSort() {
+    this._sortComponent.setSortTypeChangeHandler(this._sortTypeChangeHandler);
+    render(this._tripContainer, this._sortComponent, RenderPosition.BEFOREEND);
   }
 
-  _renderWithoutEvent() {
-    render(this._tripContainer, new WithoutEvent(), RenderPosition.BEFOREEND);
+  _modeChangeHandler() {
+    Object.values(this._eventPresenter).forEach((presenter) => presenter.resetView());
+  }
+
+  _renderEvent(eventList, event) {
+    const eventPresenter = new EventPresenter(eventList, this._eventChangeHandler, this._modeChangeHandler);
+    eventPresenter.init(event);
+    this._eventPresenter[event.id] = eventPresenter;
+  }
+
+  _clearEvents() {
+    Object.values(this._eventPresenter).forEach((presenter) => presenter.destroy());
+    this._eventPresenter = {};
+    this._dayListComponent.getElement().innerHTML = ``;
   }
 }
 
