@@ -6,7 +6,7 @@ const createWithoutEventTemplate = () => {
   );
 };
 
-export default class NoEvent extends AbstractView {
+export default class WithoutEvent extends AbstractView {
   getTemplate() {
     return createWithoutEventTemplate();
   }
