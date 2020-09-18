@@ -1,19 +1,12 @@
 import AbstractView from './abstract.js';
-import {getFormatNumber, getFormatTime} from '../utils/common.js';
+import {getFormatTime} from '../utils/common.js';
 import {typesTransfer, typesActivity} from '../const.js';
+import moment from 'moment';
+import 'moment-duration-format';
 
 const getTripDuration = (start, end) => {
-  const durationInMinutes = (end - start) / (1000 * 60);
-  const minutes = Math.floor(getFormatNumber(durationInMinutes % 60));
-  if (durationInMinutes > 1440) {
-    const days = getFormatNumber(Math.floor(durationInMinutes / (1440)));
-    const hours = getFormatNumber(Math.floor((durationInMinutes % 1440) / 60));
-    return `${days}D ${hours}H ${minutes}m`;
-  } else if (durationInMinutes > 60) {
-    const hours = getFormatNumber(Math.floor(durationInMinutes / 60));
-    return `${hours}H ${minutes}m`;
-  }
-  return `${minutes}m`;
+  const duration = end - start;
+  return moment.duration(duration).format(`d[D] h[H] m[m]`);
 };
 
 const createOffer = (offer) => {

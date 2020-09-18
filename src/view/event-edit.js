@@ -1,6 +1,9 @@
 import SmartView from './smart.js';
 import {getFormatEditTime, getFormatText} from '../utils/common.js';
 import {typesTransfer, typesActivity} from '../const.js';
+import flatpickr from 'flatpickr';
+
+import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
 const createEventEditTypeTransferTemplate = (currentType) => {
   return Object.keys(typesTransfer).map((type) =>
@@ -148,12 +151,16 @@ export default class EventEdit extends SmartView {
   constructor(trip) {
     super();
     this._trip = trip;
+    this._datepicker = null;
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._favoriteChangeHandler = this._favoriteChangeHandler.bind(this);
     this._typeChangeHandler = this._typeChangeHandler.bind(this);
     this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
+    this._startTimeChangeHandler = this._startTimeChangeHandler.bind(this);
+    this._endTimeChangeHandler = this._endTimeChangeHandler.bind(this);
 
     this._setInnerHandlers();
+    this._setDatePickers();
   }
 
   getTemplate() {
@@ -162,6 +169,7 @@ export default class EventEdit extends SmartView {
 
   restoreHandlers() {
     this._setInnerHandlers();
+    this._setDatePickers();
     this.setFormSubmitHandler(this._callback.formSubmit);
   }
 
@@ -169,6 +177,32 @@ export default class EventEdit extends SmartView {
     this._callback.formSubmit = callback;
     this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
     this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._formSubmitHandler);
+  }
+
+  _setDatePickers() {
+    if (this._startDatepicker) {
+      this._startDatepicker.destroy();
+      this._startDatepicker = null;
+    }
+
+    if (this._endDatepicker) {
+      this._endDatepicker.destroy();
+      this._endDatepicker = null;
+    }
+
+    this._startDatepicker = flatpickr(this.getElement().querySelector(`input[name="event-start-time"]`), {
+      enableTime: true,
+      dateFormat: `d/m/y H:i`,
+      defaultDate: this._trip.startTime,
+      onClose: this._startTimeChangeHandler
+    });
+
+    this._endDatepicker = flatpickr(this.getElement().querySelector(`input[name="event-end-time"]`), {
+      enableTime: true,
+      dateFormat: `d/m/y H:i`,
+      defaultDate: this._trip.endTime,
+      onClose: this._endTimeChangeHandler
+    });
   }
 
   reset(event) {
@@ -199,5 +233,13 @@ export default class EventEdit extends SmartView {
   _destinationChangeHandler(evt) {
     evt.preventDefault();
     this.updateData({destination: evt.target.value});
+  }
+
+  _startTimeChangeHandler([userDate]) {
+    this.updateData({startTime: userDate});
+  }
+
+  _endTimeChangeHandler([userDate]) {
+    this.updateData({endTime: userDate});
   }
 }
