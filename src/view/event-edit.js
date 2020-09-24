@@ -1,9 +1,22 @@
 import SmartView from './smart.js';
 import {getFormatEditTime, getFormatText} from '../utils/common.js';
-import {typesTransfer, typesActivity} from '../const.js';
+import {typesTransfer, typesActivity, datePickerOptions} from '../const.js';
 import flatpickr from 'flatpickr';
+import he from 'he';
 
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
+
+const CREATE_TRIP = {
+  type: `Taxi`,
+  destination: ``,
+  description: ``,
+  startTime: Date.now(),
+  endTime: Date.now() + 86400 * 1000,
+  price: 100,
+  photos: [],
+  offers: [],
+  isFavorite: false
+};
 
 const createEventEditTypeTransferTemplate = (currentType) => {
   return Object.keys(typesTransfer).map((type) =>
@@ -41,7 +54,7 @@ const createOffer = (offer) => {
 const createPhoto = (photo) => `<img class="event__photo" src="${photo}" alt="Event photo"></img>`;
 const preposition = Object.assign(typesTransfer, typesActivity);
 
-const createEventEditTemplate = (trip) => {
+const createEventEditTemplate = (trip, isNewEvent) => {
   const {type, destination, description, startTime, endTime, price, isFavorite, offers, photos} = trip;
   const prep = preposition[type];
   const typeTransferTemplate = createEventEditTypeTransferTemplate(type);
@@ -79,7 +92,7 @@ const createEventEditTemplate = (trip) => {
             <label class="event__label  event__type-output" for="event-destination-1">
                 ${type} ${prep}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination}" list="destination-list-1">
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(destination)}" list="destination-list-1">
             <datalist id="destination-list-1">
               <option value="Amsterdam"></option>
               <option value="Geneva"></option>
@@ -104,35 +117,36 @@ const createEventEditTemplate = (trip) => {
               <span class="visually-hidden">price</span>
               &euro;
             </label>
-            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
+            <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${price}">
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-          <button class="event__reset-btn" type="reset">Delete</button>
+          <button class="event__reset-btn" type="reset">${isNewEvent ? `Cancel` : `Delete`}</button>
 
-          <input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${isFavorite ? `checked` : ``}>
+          ${isNewEvent ? `` : `<input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${isFavorite ? `checked` : ``}>
           <label class="event__favorite-btn" for="event-favorite-1">
             <span class="visually-hidden">Add to favorite</span>
             <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
               <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>
             </svg>
-          </label>
+          </label>`}
 
-          <button class="event__rollup-btn" type="button">
+          ${isNewEvent ? `` : `<button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
-          </button>
+          </button>`}
         </header>
 
         <section class="event__details">
-          <section class="event__section  event__section--offers">
+          ${offers.length ? `<section class="event__section  event__section--offers">
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
             <div class="event__available-offers">
               ${offersElement}
             </div>
-          </section>
+          </section>` : ``}
+
           <section class="event__section  event__section--destination">
-            <h3 class="event__section-title  event__section-title--destination">${destination}</h3>
+            <h3 class="event__section-title  event__section-title--destination">${he.encode(destination)}</h3>
             <p class="event__destination-description">${description}</p>
 
             <div class="event__photos-container">
@@ -148,14 +162,17 @@ const createEventEditTemplate = (trip) => {
 };
 
 export default class EventEdit extends SmartView {
-  constructor(trip) {
+  constructor(trip = CREATE_TRIP, isNewEvent = false) {
     super();
     this._trip = trip;
+    this._isNewEvent = isNewEvent;
     this._datepicker = null;
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._formDeleteClickHandler = this._formDeleteClickHandler.bind(this);
     this._favoriteChangeHandler = this._favoriteChangeHandler.bind(this);
     this._typeChangeHandler = this._typeChangeHandler.bind(this);
     this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
+    this._priceChangeHandler = this._priceChangeHandler.bind(this);
     this._startTimeChangeHandler = this._startTimeChangeHandler.bind(this);
     this._endTimeChangeHandler = this._endTimeChangeHandler.bind(this);
 
@@ -164,19 +181,37 @@ export default class EventEdit extends SmartView {
   }
 
   getTemplate() {
-    return createEventEditTemplate(this._trip);
+    return createEventEditTemplate(this._trip, this._isNewEvent);
   }
 
   restoreHandlers() {
     this._setInnerHandlers();
     this._setDatePickers();
     this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setDeleteClickHandler(this._callback.deleteClick);
+  }
+
+  setDeleteClickHandler(callback) {
+    this._callback.deleteClick = callback;
+    this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, this._formDeleteClickHandler);
   }
 
   setFormSubmitHandler(callback) {
     this._callback.formSubmit = callback;
     this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
-    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._formSubmitHandler);
+  }
+
+  reset(event) {
+    this.updateData(event);
+  }
+
+  _setInnerHandlers() {
+    if (!this._isNewEvent) {
+      this.getElement().querySelector(`.event__favorite-checkbox`).addEventListener(`change`, this._favoriteChangeHandler);
+    }
+    this.getElement().querySelector(`.event__type-list`).addEventListener(`change`, this._typeChangeHandler);
+    this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, this._destinationChangeHandler);
+    this.getElement().querySelector(`.event__input--price`).addEventListener(`change`, this._priceChangeHandler);
   }
 
   _setDatePickers() {
@@ -190,29 +225,14 @@ export default class EventEdit extends SmartView {
       this._endDatepicker = null;
     }
 
-    this._startDatepicker = flatpickr(this.getElement().querySelector(`input[name="event-start-time"]`), {
-      enableTime: true,
-      dateFormat: `d/m/y H:i`,
-      defaultDate: this._trip.startTime,
-      onClose: this._startTimeChangeHandler
-    });
+    this._startDatepicker = flatpickr(this.getElement().querySelector(`input[name="event-start-time"]`), Object.assign({}, datePickerOptions, {defaultDate: this._trip.startTime, onClose: this._startTimeChangeHandler}));
 
-    this._endDatepicker = flatpickr(this.getElement().querySelector(`input[name="event-end-time"]`), {
-      enableTime: true,
-      dateFormat: `d/m/y H:i`,
-      defaultDate: this._trip.endTime,
-      onClose: this._endTimeChangeHandler
-    });
+    this._endDatepicker = flatpickr(this.getElement().querySelector(`input[name="event-end-time"]`), Object.assign({}, datePickerOptions, {defaultDate: this._trip.endTime, onClose: this._endTimeChangeHandler}));
   }
 
-  reset(event) {
-    this.updateData(event);
-  }
-
-  _setInnerHandlers() {
-    this.getElement().querySelector(`.event__type-list`).addEventListener(`change`, this._typeChangeHandler);
-    this.getElement().querySelector(`.event__favorite-checkbox`).addEventListener(`change`, this._favoriteChangeHandler);
-    this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, this._destinationChangeHandler);
+  _formDeleteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.deleteClick(this._trip);
   }
 
   _formSubmitHandler(evt) {
@@ -242,4 +262,10 @@ export default class EventEdit extends SmartView {
   _endTimeChangeHandler([userDate]) {
     this.updateData({endTime: userDate});
   }
+
+  _priceChangeHandler(evt) {
+    evt.preventDefault();
+    this.updateData({price: evt.target.value});
+  }
+
 }

@@ -26,6 +26,8 @@ export const getFormatEditTime = (time) => {
 
 export const sortByPrice = (a, b) => b.price - a.price;
 export const sortByTime = (a, b) => (b.endTime - b.startTime - a.endTime + a.startTime);
+export const sortByStartTime = (a, b) => a.startTime - b.startTime;
+export const isDatesEqual = (a, b) => a === b;
 
 export const updateItem = (arr, item) => {
   const index = arr.findIndex((elem) => item.id === elem.id);

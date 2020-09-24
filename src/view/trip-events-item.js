@@ -3,6 +3,7 @@ import {getFormatTime} from '../utils/common.js';
 import {typesTransfer, typesActivity} from '../const.js';
 import moment from 'moment';
 import 'moment-duration-format';
+import he from 'he';
 
 const getTripDuration = (start, end) => {
   const duration = end - start;
@@ -36,7 +37,7 @@ const createTripEventsItemTemplate = (trip) => {
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
         </div>
-        <h3 class="event__title">${type} ${prep} ${destination}</h3>
+        <h3 class="event__title">${type} ${prep} ${he.encode(destination)}</h3>
 
         <div class="event__schedule">
           <p class="event__time">

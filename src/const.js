@@ -52,3 +52,32 @@ export const SortType = {
   PRICE: `price`,
   TIME: `time`,
 };
+
+export const UserAction = {
+  ADD_EVENT: `ADD_EVENT`,
+  EDIT_EVENT: `EDIT_EVENT`,
+  DELETE_EVENT: `DELETE_EVENT`,
+};
+
+export const UpdateType = {
+  MAJOR: `MAJOR`,
+  MINOR: `MINOR`,
+  PATCH: `PATCH`,
+};
+
+export const FilterType = {
+  PAST: `PAST`,
+  FUTURE: `FUTURE`,
+  EVERYTHING: `EVERYTHING`,
+};
+
+export const filter = {
+  [FilterType.EVERYTHING]: (events) => events,
+  [FilterType.FUTURE]: (events) => events.filter((event) => event.startTime > Date.now()),
+  [FilterType.PAST]: (events) => events.filter((event) => event.endTime < Date.now())
+};
+
+export const datePickerOptions = {
+  enableTime: true,
+  dateFormat: `d/m/y H:i`,
+};
