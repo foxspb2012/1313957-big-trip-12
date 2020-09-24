@@ -1,6 +1,8 @@
 import EventView from '../view/trip-events-item.js';
 import EventEditView from '../view/event-edit.js';
 import {render, RenderPosition, remove, replace} from '../utils/render.js';
+import {UpdateType, UserAction} from '../const.js';
+import {isDatesEqual} from '../utils/common.js';
 
 const Mode = {
   DEFAULT: `DEFAULT`,
@@ -20,6 +22,7 @@ export default class Event {
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
     this._eventClickHandler = this._eventClickHandler.bind(this);
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._deleteClickHandler = this._deleteClickHandler.bind(this);
   }
 
   init(event) {
@@ -32,6 +35,7 @@ export default class Event {
 
     this._eventComponent.setClickHandler(this._eventClickHandler);
     this._eventEditComponent.setFormSubmitHandler(this._formSubmitHandler);
+    this._eventEditComponent.setDeleteClickHandler(this._deleteClickHandler);
 
     if (prevEventComponent === null || prevEventEditComponent === null) {
       render(this._eventList, this._eventComponent, RenderPosition.BEFOREEND);
@@ -86,8 +90,13 @@ export default class Event {
     this._replaceCardToForm();
   }
 
-  _formSubmitHandler(event) {
-    this._changeData(event);
+  _formSubmitHandler(update) {
+    const isMajorUpdate = !isDatesEqual(this._event.startTime, update.startTime) || !isDatesEqual(this._event.endTime, update.endTime);
+    this._changeData(UserAction.EDIT_EVENT, isMajorUpdate ? UpdateType.MAJOR : UpdateType.PATCH, update);
     this._replaceFormToCard();
+  }
+
+  _deleteClickHandler(event) {
+    this._changeData(UserAction.DELETE_EVENT, UpdateType.MAJOR, event);
   }
 }
