@@ -81,3 +81,25 @@ export const datePickerOptions = {
   enableTime: true,
   dateFormat: `d/m/y H:i`,
 };
+
+export const MenuItem = {
+  TABLE: `TABLE`,
+  STATS: `STATS`
+};
+
+export const EventEditMode = {
+  EDIT_EVENT: `EDIT_EVENT`,
+  ADD_EVENT: `ADD_EVENT`
+};
+
+export const CREATE_TRIP = {
+  type: `Taxi`,
+  destination: ``,
+  description: ``,
+  startTime: Date.now(),
+  endTime: Date.now() + 86400 * 1000,
+  price: 100,
+  photos: [],
+  offers: [],
+  isFavorite: false
+};

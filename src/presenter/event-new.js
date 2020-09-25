@@ -1,5 +1,5 @@
 import EventEditView from '../view/event-edit.js';
-import {UpdateType, UserAction} from '../const.js';
+import {UpdateType, UserAction, EventEditMode, CREATE_TRIP} from '../const.js';
 import {generateId} from '../mock/trip.js';
 import {render, RenderPosition, remove} from '../utils/render.js';
 
@@ -20,7 +20,7 @@ export default class EventNew {
       return;
     }
 
-    this._eventEditComponent = new EventEditView(undefined, true);
+    this._eventEditComponent = new EventEditView(CREATE_TRIP, EventEditMode.ADD_EVENT);
     this._eventEditComponent.setFormSubmitHandler(this._formSubmitHandler);
     this._eventEditComponent.setDeleteClickHandler(this._deleteClickHandler);
 

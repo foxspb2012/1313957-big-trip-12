@@ -1,7 +1,7 @@
 import EventView from '../view/trip-events-item.js';
 import EventEditView from '../view/event-edit.js';
 import {render, RenderPosition, remove, replace} from '../utils/render.js';
-import {UpdateType, UserAction} from '../const.js';
+import {UpdateType, UserAction, EventEditMode} from '../const.js';
 import {isDatesEqual} from '../utils/common.js';
 
 const Mode = {
@@ -31,7 +31,7 @@ export default class Event {
 
     this._event = event;
     this._eventComponent = new EventView(event);
-    this._eventEditComponent = new EventEditView(event);
+    this._eventEditComponent = new EventEditView(event, EventEditMode.EDIT_EVENT);
 
     this._eventComponent.setClickHandler(this._eventClickHandler);
     this._eventEditComponent.setFormSubmitHandler(this._formSubmitHandler);
