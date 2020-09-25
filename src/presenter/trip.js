@@ -3,7 +3,7 @@ import DayView from '../view/trip-days.js';
 import DaysListView from '../view/trip-days-container.js';
 import WithoutEvent from '../view/without-event.js';
 import EventPresenter from './event.js';
-import {render, RenderPosition, replace} from '../utils/render';
+import {render, RenderPosition, replace, remove} from '../utils/render';
 import {sortByPrice, sortByTime, sortByStartTime} from '../utils/common.js';
 import {SortType} from '../const.js';
 import EventNewPresenter from './event-new.js';
@@ -26,15 +26,15 @@ export default class Trip {
     this._filterTypeChangeHandler = this._filterTypeChangeHandler.bind(this);
     this._modelEventsChangeHandler = this._modelEventsChangeHandler.bind(this);
     this._eventNewPresenter = new EventNewPresenter(this._dayListComponent, this._eventChangeHandler);
-
-    this._filterModel.addObserver(this._modelEventsChangeHandler);
-    this._eventsModel.addObserver(this._modelEventsChangeHandler);
   }
 
   init() {
     if (this._eventsModel.length === 0) {
       this._renderWithoutEvent();
     } else {
+      this._currentSortType = SortType.DEFAULT;
+      this._eventsModel.addObserver(this._modelEventsChangeHandler);
+      this._filterModel.addObserver(this._modelEventsChangeHandler);
       this._renderSort();
       this._renderEvents();
     }
@@ -44,6 +44,14 @@ export default class Trip {
     this._currentSortType = SortType.DEFAULT;
     this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
     this._eventNewPresenter.init();
+  }
+
+  destroy() {
+    this._clearEvents();
+    this._clearSort();
+
+    this._eventsModel.removeObserver(this._modelEventsChangeHandler);
+    this._filterModel.removeObserver(this._modelEventsChangeHandler);
   }
 
   _getEvents() {
@@ -96,7 +104,6 @@ export default class Trip {
     }
   }
 
-
   _renderEvents(trips = this._getEvents().slice()) {
     const isSortDefault = this._currentSortType === SortType.DEFAULT;
     const tripDays = [...new Set(trips.map((trip) => new Date(trip.startTime).toDateString()))];
@@ -133,6 +140,13 @@ export default class Trip {
     }
 
     replace(this._sortComponent, prevSortComponent);
+  }
+
+  _clearSort() {
+    if (this._sortComponent !== null) {
+      remove(this._sortComponent);
+    }
+    this._sortComponent = null;
   }
 
   _modeChangeHandler() {
