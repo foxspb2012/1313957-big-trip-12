@@ -20,7 +20,7 @@ const getPriceByType = (events, type) => events.filter((event) => event.type.toU
 const getMoneyStats = (events) => getUniqueTypes(events).map((type) => getPriceByType(events, type));
 
 const getTransportTypeCount = (events, type) => events.filter((event) => event.type.toUpperCase() === type).length;
-const getUniqueTransportEvents = (events) => getUniqueTypes(events.filter((event) => TRANSPORT_TYPES.some((type) => type === event.type)));
+const getUniqueTransportEvents = (events) => getUniqueTypes(events.filter((event) => TRANSPORT_TYPES.some((type) => type.toUpperCase() === event.type.toUpperCase())));
 const getTransportStats = (events) => getUniqueTransportEvents(events).map((type) => getTransportTypeCount(events, type));
 
 const timeByType = (events, type) => events.filter((event) => event.type.toUpperCase() === type).reduce((accumulator, currentValue) => accumulator + currentValue.endTime - currentValue.startTime, 0);

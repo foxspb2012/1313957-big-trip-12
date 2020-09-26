@@ -1,7 +1,11 @@
 import AbstractView from './abstract.js';
 
-const getTripCost = (trips) => trips.reduce((accumulator, currentValue) =>
-  accumulator + currentValue.price + currentValue.offers.reduce((acc, curValue) => acc + curValue.price, 0), 0);
+const getTripCost = (trips) => {
+  if (!trips) {
+    return 0;
+  }
+  return trips.reduce((accumulator, currentValue) => accumulator + currentValue.price + currentValue.offers.reduce((acc, curValue) => acc + curValue.price, 0), 0);
+};
 
 const createTripCostTemplate = (trips) => {
   const cost = getTripCost(trips);
