@@ -2,7 +2,7 @@ import Abstract from '../view/abstract.js';
 
 export const RenderPosition = {
   AFTERBEGIN: `afterbegin`,
-  BEFOREEND: `beforeend`
+  BEFOREEND: `beforeend`,
 };
 
 export const createElement = (template) => {
@@ -58,7 +58,7 @@ export const replace = (newChild, oldChild) => {
 
 export const remove = (component) => {
   if (!(component instanceof Abstract)) {
-    throw new Error(`Можно удалять только компонент`);
+    throw new Error(`Можно удалить только компонент`);
   }
 
   component.getElement().remove();
