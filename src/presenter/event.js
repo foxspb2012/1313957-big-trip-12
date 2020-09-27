@@ -1,4 +1,4 @@
-import EventView from '../view/trip-events-item.js';
+import EventView from '../view/event.js';
 import EventEditView from '../view/event-edit.js';
 import {render, RenderPosition, remove, replace} from '../utils/render.js';
 import {UpdateType, UserAction, EventEditMode} from '../const.js';
@@ -7,6 +7,12 @@ import {isDatesEqual} from '../utils/common.js';
 const Mode = {
   DEFAULT: `DEFAULT`,
   EDITING: `EDITING`,
+};
+
+export const State = {
+  SAVING: `SAVING`,
+  DELETING: `DELETING`,
+  ABORTING: `ABORTING`,
 };
 
 export default class Event {
@@ -18,11 +24,14 @@ export default class Event {
     this._eventComponent = null;
     this._eventEditComponent = null;
     this._mode = Mode.DEFAULT;
+    this._availableOffers = null;
+    this._destinations = null;
 
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
     this._eventClickHandler = this._eventClickHandler.bind(this);
-    this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._eventEditClickHandler = this._eventEditClickHandler.bind(this);
     this._deleteClickHandler = this._deleteClickHandler.bind(this);
+    this._formSubmitHandler = this._formSubmitHandler.bind(this);
   }
 
   init(event) {
@@ -34,6 +43,7 @@ export default class Event {
     this._eventEditComponent = new EventEditView(event, EventEditMode.EDIT_EVENT);
 
     this._eventComponent.setClickHandler(this._eventClickHandler);
+    this._eventEditComponent.setClickHandler(this._eventEditClickHandler);
     this._eventEditComponent.setFormSubmitHandler(this._formSubmitHandler);
     this._eventEditComponent.setDeleteClickHandler(this._deleteClickHandler);
 
@@ -47,7 +57,8 @@ export default class Event {
     }
 
     if (this._mode === Mode.EDITING) {
-      replace(this._eventEditComponent, prevEventEditComponent);
+      replace(this._eventComponent, prevEventEditComponent);
+      this._mode = Mode.DEFAULT;
     }
 
     remove(prevEventComponent);
@@ -62,6 +73,25 @@ export default class Event {
   resetView() {
     if (this._mode !== Mode.DEFAULT) {
       this._replaceFormToCard();
+    }
+  }
+
+  setViewState(state) {
+    const resetFormState = () => {
+      this._eventEditComponent.updateData({isSaving: false, isDisabled: false, isDeleting: false});
+    };
+
+    switch (state) {
+      case State.SAVING:
+        this._eventEditComponent.updateData({isSaving: true, isDisabled: true});
+        break;
+      case State.DELETING:
+        this._eventEditComponent.updateData({isDeleting: true, isDisabled: true});
+        break;
+      case State.ABORTING:
+        this._eventComponent.shake(resetFormState);
+        this._eventEditComponent.shake(resetFormState);
+        break;
     }
   }
 
@@ -90,13 +120,17 @@ export default class Event {
     this._replaceCardToForm();
   }
 
-  _formSubmitHandler(update) {
-    const isMajorUpdate = !isDatesEqual(this._event.startTime, update.startTime) || !isDatesEqual(this._event.endTime, update.endTime);
-    this._changeData(UserAction.EDIT_EVENT, isMajorUpdate ? UpdateType.MAJOR : UpdateType.PATCH, update);
+  _eventEditClickHandler() {
+    this._eventEditComponent.reset(this._event);
     this._replaceFormToCard();
   }
 
   _deleteClickHandler(event) {
     this._changeData(UserAction.DELETE_EVENT, UpdateType.MAJOR, event);
+  }
+
+  _formSubmitHandler(update) {
+    const isMajorUpdate = !isDatesEqual(this._event.startTime, update.startTime) || !isDatesEqual(this._event.endTime, update.endTime);
+    this._changeData(UserAction.EDIT_EVENT, isMajorUpdate ? UpdateType.MAJOR : UpdateType.PATCH, update);
   }
 }

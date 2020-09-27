@@ -1,5 +1,14 @@
 import AbstractView from './abstract.js';
 
+const createSortItem = (sort, currentSort) => {
+  return (
+    `<div class="trip-sort__item  trip-sort__item--${sort}">
+      <input id="sort-${sort}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${sort}" data-sort-type="${sort}" ${sort === currentSort ? `checked` : ``}>
+      <label class="trip-sort__btn" for="sort-${sort}">${sort}</label>
+    </div>`
+  );
+};
+
 const createTripSortTemplate = (sorts, currentSort) => {
   const tripSortElement = sorts.map((sort) => createSortItem(sort, currentSort)).join(``);
   return (
@@ -8,15 +17,6 @@ const createTripSortTemplate = (sorts, currentSort) => {
       ${tripSortElement}
       <span class="trip-sort__item  trip-sort__item--offers">Offers</span>
     </form>`
-  );
-};
-
-const createSortItem = (sort, currentSort) => {
-  return (
-    `<div class="trip-sort__item  trip-sort__item--${sort}">
-      <input id="sort-${sort}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${sort}" data-sort-type="${sort}" ${sort === currentSort ? `checked` : ``}>
-      <label class="trip-sort__btn" for="sort-${sort}">${sort}</label>
-    </div>`
   );
 };
 

@@ -1,14 +1,15 @@
 import AbstractView from './abstract.js';
 import {getFormatDate} from '../utils/common.js';
 
-export const createTripInfoTemplate = (trips) => {
-  const firstPoint = trips ? trips[0] : ``;
-  const lastPoint = trips ? trips[trips.length - 1] : ``;
-  const dates = trips ? `${getFormatDate(firstPoint.startTime)}&nbsp;&mdash;&nbsp;${getFormatDate(lastPoint.startTime)}` : ``;
-  const uniquePoint = trips ? [...new Set(trips.map((trip) => trip.destination.name))] : ``;
+const createTripInfoTemplate = (trips) => {
+  const firstLocation = trips ? trips[0] : ``;
+  const lastLocation = trips ? trips[trips.length - 1] : ``;
+
+  const dates = trips ? `${getFormatDate(firstLocation.startTime)}&nbsp;&mdash;&nbsp;${getFormatDate(lastLocation.startTime)}` : ``;
+  const uniqueLocations = trips ? [...new Set(trips.map((trip) => trip.destination.name))] : ``;
   let title = ``;
   if (trips) {
-    title = (uniquePoint.length > 3) ? `${firstPoint.destination.name} &mdash;...&mdash; ${lastPoint.destination.name}` : uniquePoint.join(`-`);
+    title = (uniqueLocations.length > 3) ? `${firstLocation.destination.name} &mdash;...&mdash; ${lastLocation.destination.name}` : uniqueLocations.join(`-`);
   }
 
   return (

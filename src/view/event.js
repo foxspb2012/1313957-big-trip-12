@@ -1,9 +1,9 @@
 import AbstractView from './abstract.js';
 import {getFormatTime} from '../utils/common.js';
-import {typesTransfer, typesActivity} from '../const.js';
+import {Preposition} from '../const.js';
+import he from 'he';
 import moment from 'moment';
 import 'moment-duration-format';
-import he from 'he';
 
 const getTripDuration = (start, end) => {
   const duration = end - start;
@@ -14,20 +14,18 @@ const createOffer = (offer) => {
   const {title, price} = offer;
   return (
     `<li class="event__offer">
-      <span class="event__offer-title">${title}</span>
-      &plus;
-      &euro;&nbsp;<span class="event__offer-price">${price}</span>
-    </li>`
+        <span class="event__offer-title">${title}</span>
+        &plus;
+        &euro;&nbsp;<span class="event__offer-price">${price}</span>
+      </li>`
   );
 };
-
-const preposition = Object.assign(typesTransfer, typesActivity);
 
 const createTripEventsItemTemplate = (trip) => {
   const {price, startTime, endTime, offers, destination} = trip;
   let {type} = trip;
   type = type[0].toUpperCase() + type.slice(1);
-  const prep = preposition[type];
+  const prep = Preposition[type.toUpperCase()];
   const formattedStartTime = getFormatTime(startTime);
   const formattedEndTime = getFormatTime(endTime);
   const duration = getTripDuration(startTime, endTime);
