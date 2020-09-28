@@ -1,6 +1,6 @@
 import Abstract from './abstract.js';
 
-const createWithoutEventsTemplate = () => {
+const createNoEventsElement = () => {
   return (
     `<p class="trip-events__msg">Loading...</p>`
   );
@@ -8,6 +8,6 @@ const createWithoutEventsTemplate = () => {
 
 export default class Loading extends Abstract {
   getTemplate() {
-    return createWithoutEventsTemplate();
+    return createNoEventsElement();
   }
 }

@@ -36,15 +36,15 @@ export default class Filter {
     remove(prevFilterComponent);
   }
 
-  _modelChangeHandler() {
-    this.init();
-  }
-
   _getFilters() {
     return Object.values(FilterType);
   }
 
   _filterTypeChangeHandler(filterType) {
     this._filterModel.setFilter(UpdateType.MAJOR, filterType);
+  }
+
+  _modelChangeHandler() {
+    this.init();
   }
 }

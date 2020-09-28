@@ -1,4 +1,4 @@
-export default class Storage {
+export default class Store {
   constructor() {
     this._offers = [];
     this._destinations = [];
