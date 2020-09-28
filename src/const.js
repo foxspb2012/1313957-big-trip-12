@@ -32,9 +32,9 @@ export const Preposition = {
 };
 
 export const SortType = {
+  DEFAULT: `event`,
   TIME: `time`,
   PRICE: `price`,
-  DEFAULT: `event`,
 };
 
 export const UpdateType = {
@@ -51,9 +51,9 @@ export const UserAction = {
 };
 
 export const FilterType = {
-  PAST: `PAST`,
-  FUTURE: `FUTURE`,
   EVERYTHING: `EVERYTHING`,
+  FUTURE: `FUTURE`,
+  PAST: `PAST`,
 };
 
 export const EventEditMode = {
@@ -71,3 +71,8 @@ export const datePickerOptions = {
   enableTime: true,
   dateFormat: `d/m/y H:i`,
 };
+
+export const MAX_OFFERS_LENGTH = 3;
+
+export const types = [`taxi`, `bus`, `train`, `ship`, `transport`, `drive`, `flight`, `check-in`, `sightseeing`, `restaurant`];
+export const activityStartIndex = 7;

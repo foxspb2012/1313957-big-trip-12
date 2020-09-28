@@ -1,9 +1,9 @@
 import SmartView from './smart.js';
 import {getFormatEditTime, getFormatText} from '../utils/common.js';
-import {Preposition, datePickerOptions, EventEditMode} from '../const.js';
-import StoreModel from '../model/store.js';
-import flatpickr from 'flatpickr';
+import {Preposition, datePickerOptions, EventEditMode, types, activityStartIndex} from '../const.js';
 import he from 'he';
+import flatpickr from 'flatpickr';
+import StoreModel from '../model/store.js';
 
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
@@ -31,6 +31,15 @@ const createDestinationOption = (destination) => {
   );
 };
 
+const createTypeElement = (type, tripType) => {
+  return (
+    `<div class="event__type-item">
+      <input id="event-type-${type}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${type === tripType.toLowerCase() ? `checked` : ``}>
+      <label class="event__type-label  event__type-label--${type}" for="event-type-${type}">${type[0].toUpperCase() + type.slice(1)}</label>
+    </div>`
+  );
+};
+
 const createEventEditTemplate = (trip, mode, destinations, availableOffers) => {
   const {price, startTime, endTime, isFavorite, offers, destination, isDisabled, isSaving, isDeleting} = trip;
   let {type} = trip;
@@ -42,10 +51,12 @@ const createEventEditTemplate = (trip, mode, destinations, availableOffers) => {
   const picturesElement = destination.pictures.map(({src, description}) => createPhoto(src, description)).join(``);
   const destinationOptionsElement = destinations.map((dest) => createDestinationOption(dest)).join(``);
   const deleteButtonText = isDeleting ? `Deleting...` : `Delete`;
+  const typeGroupTransfer = types.slice(0, activityStartIndex).map((it) => createTypeElement(it, type)).join(``);
+  const typeGroupActivity = types.slice(activityStartIndex).map((it) => createTypeElement(it, type)).join(``);
 
   return (
-    `<li class="trip-events__item">
-      <form class="event  event--edit" action="#" method="post">
+    `${mode === EventEditMode.EDIT_EVENT ? `<li class="trip-events__item">` : `<div>`}
+      <form class="${mode === EventEditMode.ADD_EVENT ? `trip-events__item` : ``} event  event--edit" action="#" method="post">
         <header class="event__header">
           <div class="event__type-wrapper">
             <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -57,60 +68,12 @@ const createEventEditTemplate = (trip, mode, destinations, availableOffers) => {
             <div class="event__type-list">
               <fieldset class="event__type-group">
                 <legend class="visually-hidden">Transfer</legend>
-
-                <div class="event__type-item">
-                  <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="Taxi">
-                  <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
-                </div>
-
-                <div class="event__type-item">
-                  <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="Bus">
-                  <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
-                </div>
-
-                <div class="event__type-item">
-                  <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="Train">
-                  <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
-                </div>
-
-                <div class="event__type-item">
-                  <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="Ship">
-                  <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
-                </div>
-
-                <div class="event__type-item">
-                  <input id="event-type-transport-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="Transport">
-                  <label class="event__type-label  event__type-label--transport" for="event-type-transport-1">Transport</label>
-                </div>
-
-                <div class="event__type-item">
-                  <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="Drive">
-                  <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
-                </div>
-
-                <div class="event__type-item">
-                  <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="Flight">
-                  <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
-                </div>
+                ${typeGroupTransfer}
               </fieldset>
 
               <fieldset class="event__type-group">
                 <legend class="visually-hidden">Activity</legend>
-
-                <div class="event__type-item">
-                  <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="Check-in">
-                  <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
-                </div>
-
-                <div class="event__type-item">
-                  <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="Sightseeing">
-                  <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
-                </div>
-
-                <div class="event__type-item">
-                  <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="Restaurant">
-                  <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
-                </div>
+                ${typeGroupActivity}
               </fieldset>
             </div>
           </div>
@@ -119,7 +82,7 @@ const createEventEditTemplate = (trip, mode, destinations, availableOffers) => {
             <label class="event__label  event__type-output" for="event-destination-1">
               ${type} ${prep}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(destination.name)}" list="destination-list-1" ${isDisabled ? `disabled` : ``}>
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(destination.name)}" list="destination-list-1" ${isDisabled ? `disabled` : ``} required>
             <datalist id="destination-list-1">
               ${destinationOptionsElement}
             </datalist>
@@ -192,7 +155,7 @@ const createEventEditTemplate = (trip, mode, destinations, availableOffers) => {
           </section>` : ``}
         </section>
       </form>
-    </li>`
+    ${mode === EventEditMode.EDIT_EVENT ? `</li>` : `</div>`}`
   );
 };
 
@@ -219,7 +182,6 @@ export default class EventEdit extends SmartView {
     this._startTimeChangeHandler = this._startTimeChangeHandler.bind(this);
     this._endTimeChangeHandler = this._endTimeChangeHandler.bind(this);
     this._offersChangeHandler = this._offersChangeHandler.bind(this);
-
     this._setInnerHandlers();
     this._setDatePickers();
   }
@@ -311,7 +273,7 @@ export default class EventEdit extends SmartView {
 
   _priceChangeHandler(evt) {
     evt.preventDefault();
-    this.updateData({price: evt.target.value});
+    this.updateData({price: evt.target.value}, true);
   }
 
   _offersChangeHandler(evt) {
