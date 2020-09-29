@@ -1,5 +1,5 @@
-import EventsModel from './model/events.js';
-import StoreModel from './model/store.js';
+import EventsModel from '../model/events.js';
+import StoreModel from '../model/store.js';
 
 const Method = {
   GET: `GET`,
